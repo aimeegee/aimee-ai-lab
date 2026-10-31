@@ -6,7 +6,7 @@
 
 ## 路径约定
 
-repo 根 = 本文件所在 repo 的根目录(用 `git rev-parse --show-toplevel` 确定;从其他目录被 `/lead` 唤起时,repo 根是 `/Users/naixingeng/Develop/aimee-ai-lab`)。下文所有路径都相对 repo 根。
+repo 根 = 本文件所在 repo 的根目录(用 `git rev-parse --show-toplevel` 确定;从其他目录被 `/team` 唤起时,repo 根是 `/Users/naixingeng/Develop/aimee-ai-lab`)。下文所有路径都相对 repo 根。
 
 ## 共享文件的 git 规则
 
@@ -113,7 +113,7 @@ Aimee 确认需求后(先按「记录 Aimee 的决定」处理她的回答):
 
 ## 恢复
 
-被 `/lead` 唤起,或 Aimee 说「继续」时:先 `git pull --rebase origin main`,读所有 `projects/*/STATUS.md`,从记录的阶段接着做,不从头开始。worktree 不存在就用 `git worktree add .worktrees/<slug> project/<slug>` 重新挂上(本地没有分支时先 `git fetch origin project/<slug>:project/<slug>`)。
+被 `/team` 唤起,或 Aimee 说「继续」时:先 `git pull --rebase origin main`,读所有 `projects/*/STATUS.md`,从记录的阶段接着做,不从头开始。worktree 不存在就用 `git worktree add .worktrees/<slug> project/<slug>` 重新挂上(本地没有分支时先 `git fetch origin project/<slug>:project/<slug>`)。
 
 ## 独立 repo
 

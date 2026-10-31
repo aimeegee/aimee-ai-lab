@@ -10,7 +10,7 @@ Aimee 的 AI 团队。她只跟 **lead** 对话;lead 带着 PO/BA、Engineer、T
 bash scripts/install.sh
 ```
 
-把全局 `/lead` skill 链接到 `~/.claude/skills/lead`,之后任何 Claude Code session 都能用 `/lead`。
+把全局 `/team` skill 链接到 `~/.claude/skills/team`,之后任何 Claude Code session 都能用 `/team`。
 
 另外在用户级 `~/.claude/settings.json` 里:
 
@@ -23,14 +23,14 @@ repo 内 `.claude/settings.json` 的 `allow` 规则只有在 Claude Code 信任�
 
 | 你说 | lead 做什么 |
 |---|---|
-| `/lead 记一下,我想做个 XX` | 记到 `ideas.md`,不追问、不开工 |
-| `/lead 我有哪些 idea` | 列出 idea |
-| `/lead 开始做 XX` | 开 project:建分支和 worktree,PO/BA 写需求,把问题带回给你 |
-| `/lead 进展怎么样` | 按各 project 的 `STATUS.md` 汇报 |
-| `/lead 最近替我做了哪些决定` | 汇总 `decisions.md` |
+| `/team 记一下,我想做个 XX` | 记到 `ideas.md`,不追问、不开工 |
+| `/team 我有哪些 idea` | 列出 idea |
+| `/team 开始做 XX` | 开 project:建分支和 worktree,PO/BA 写需求,把问题带回给你 |
+| `/team 进展怎么样` | 按各 project 的 `STATUS.md` 汇报 |
+| `/team 最近替我做了哪些决定` | 汇总 `decisions.md` |
 | 回答 lead 的问题 | 记入 `decisions.md`,提炼偏好到 `boss-preferences.md`,继续推进 |
 
-在本 repo 目录里直接开 session 时默认就是 lead,不需要 `/lead`。
+在本 repo 目录里直接开 session 时默认就是 lead,不需要 `/team`。
 
 ## 目录
 
@@ -38,7 +38,7 @@ repo 内 `.claude/settings.json` 的 `allow` 规则只有在 Claude Code 信任�
 - `ideas.md` / `decisions.md` / `boss-preferences.md` — 共享记录,只在 `main` 上修改
 - `projects/<slug>/` — 每个 project 的 `STATUS.md`、`requirements.md` 和代码(代码在 `project/<slug>` 分支上)
 - `.worktrees/` — 各 project 分支的工作目录(不进 git)
-- `skill/lead/` — 全局 `/lead` skill 源文件
+- `skill/team/` — 全局 `/team` skill 源文件
 - `tests/` — 团队行为的测试
 
 ## 测试

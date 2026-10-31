@@ -14,6 +14,6 @@
 - `decisions.md` — 决策记录(decision register)
 - `boss-preferences.md` — 从 Aimee 的选择中提炼的偏好
 - `projects/<slug>/` — 每个 project 的 STATUS、需求和代码
-- `skill/lead/` — 全局 `/lead` skill 的源文件(`scripts/install.sh` 安装)
+- `skill/team/` — 全局 `/team` skill 的源文件(`scripts/install.sh` 安装)
 - `docs/` — 团队本身的设计文档和实现计划
 - `tests/` — 团队行为的测试

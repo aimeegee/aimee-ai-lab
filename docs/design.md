@@ -41,15 +41,15 @@ Aimee 想要一个「虚拟团队」:她只跟一个人(team lead)对话,lead �
 
 | Aimee 说 | lead 做什么 |
 |---|---|
-| `/lead 记一下,我想做个 XX` 或「跟 lead 说记个 idea」 | 写入 `ideas.md`:原话、日期、一两句理解。不追问、不开工 |
-| `/lead 我有哪些 idea` | 列出 `ideas.md` |
-| `/lead 开始做 XX` | 把 idea 转成 project(或直接新建),进入 §5 流程 |
-| `/lead 进展怎么样` / `/lead XX 做到哪了` | 读各 project 的状态文件,汇报阶段、完成了什么、卡在哪、待 Aimee 决定的事 |
-| `/lead 最近替我做了哪些决定` | 汇总 `decisions.md` 近期条目 |
+| `/team 记一下,我想做个 XX` 或「跟 lead 说记个 idea」 | 写入 `ideas.md`:原话、日期、一两句理解。不追问、不开工 |
+| `/team 我有哪些 idea` | 列出 `ideas.md` |
+| `/team 开始做 XX` | 把 idea 转成 project(或直接新建),进入 §5 流程 |
+| `/team 进展怎么样` / `/team XX 做到哪了` | 读各 project 的状态文件,汇报阶段、完成了什么、卡在哪、待 Aimee 决定的事 |
+| `/team 最近替我做了哪些决定` | 汇总 `decisions.md` 近期条目 |
 | 回答 lead 提的问题 | 记入 `decisions.md`,提炼偏好写入 `boss-preferences.md`,继续推进 |
 
 - 同一个 idea 后来又有补充,追加到原条目下,不新开一条
-- 在 `aimee-ai-lab` 目录里直接开 session 时,默认就是 lead,不需要打 `/lead`
+- 在 `aimee-ai-lab` 目录里直接开 session 时,默认就是 lead,不需要打 `/team`
 
 ## 4. 角色
 
@@ -75,7 +75,7 @@ Aimee 想要一个「虚拟团队」:她只跟一个人(team lead)对话,lead �
 7. **汇报**:lead 告诉 Aimee 完成了什么、PR 链接、自主做了哪些决定,请她 review。Aimee 同意后 lead 合并(或 Aimee 自己合并);有修改意见则回到第 4 步
 8. 如果还有后续节点,继续在同一个分支上做,重复 4–7;project 全部完成后分支在最后一次合并后删除
 
-**持续运行**:Aimee 确认需求后,lead 在后台一路推进到下一个交付节点的 PR(subagent 后台运行),Aimee 在同一 session 里可以继续聊别的或问进展。每完成一步都更新 `STATUS.md`。如果中途 session 关闭,下次 `/lead` 时 lead 读 `STATUS.md` 从断点继续。subagent 不能再派 subagent,所以每一步都由 lead 驱动。
+**持续运行**:Aimee 确认需求后,lead 在后台一路推进到下一个交付节点的 PR(subagent 后台运行),Aimee 在同一 session 里可以继续聊别的或问进展。每完成一步都更新 `STATUS.md`。如果中途 session 关闭,下次 `/team` 时 lead 读 `STATUS.md` 从断点继续。subagent 不能再派 subagent,所以每一步都由 lead 驱动。
 
 **分支与 worktree(我的决定)**
 - 每个 project 一个分支 `project/<name>`,在自己的 git worktree 里工作。`~/Develop/aimee-ai-lab` 主目录始终停在 `main`,这样多个 project 可以同时进行、互不干扰
@@ -136,7 +136,7 @@ aimee-ai-lab/
 ```
 
 **全局入口(不在 repo 里,装在 Aimee 的用户级 Claude 配置中)**
-- 一个用户级 skill `lead`(`~/.claude/skills/lead/`):在任何 session 里由 `/lead` 或「跟 lead 说…」触发。它只是个指针:让当前 session 读 `~/Develop/aimee-ai-lab/team/lead.md` 并以 lead 身份行事。所有实质内容留在 repo,有版本记录
+- 一个用户级 skill `team`(`~/.claude/skills/team/`):在任何 session 里由 `/team` 或「跟团队说…」「跟 lead 说…」触发。它只是个指针:让当前 session 读 `~/Develop/aimee-ai-lab/team/lead.md` 并以 lead 身份行事。所有实质内容留在 repo,有版本记录
 - 用户级设置中把 `~/Develop/aimee-ai-lab` 加为允许目录,使任何工作目录下的 session 都能读写它而不反复授权
 
 **派活机制(我的决定)**:角色不用 repo 内的 `.claude/agents/`(那只在 cwd 是该 repo 时加载,与「任何 session 都能用」冲突)。lead 派活时读取 `roster.md` 和对应角色文件,用 Claude Code 的 subagent 工具派出一个通用 subagent:提示词 = 角色文件内容 + 具体任务,模型 = 花名册默认值或 lead 的覆盖值。
@@ -154,7 +154,7 @@ aimee-ai-lab/
 
 ## 10. 成功标准
 
-- 在 `~/Develop` 下任意目录开 session,`/lead` 能用,能读写团队 repo
+- 在 `~/Develop` 下任意目录开 session,`/team` 能用,能读写团队 repo
 - 记一个 idea 是一句话、几秒钟的事,lead 不追问
 - 一个小 project 能从 idea 走到一个等 Aimee review 的 PR,Aimee 只被问需求确认、五类事和 PR review
 - `decisions.md` 里能看到 lead 的每个自主决定及理由
