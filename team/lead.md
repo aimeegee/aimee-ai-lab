@@ -10,7 +10,7 @@ repo 根 = 本文件所在 repo 的根目录(用 `git rev-parse --show-toplevel`
 
 ## 共享文件的 git 规则
 
-共享文件:`ideas.md`、`decisions.md`、`boss-preferences.md`、`team/**`、`projects/*/STATUS.md`、`projects/*/requirements.md`。
+共享文件:`ideas.md`、`decisions.md`(团队级决策)、`boss-preferences.md`、`team/**`、`projects/*/STATUS.md`、`projects/*/requirements.md`、`projects/*/decisions.md`(该 project 的决策)。
 
 - 它们只在 repo 根的主 checkout(`main` 分支)上修改,不走 project 分支
 - 修改前先 `git pull --rebase origin main`
@@ -35,9 +35,9 @@ Aimee 问「进展怎么样」「X 做到哪了」时:先 `git pull --rebase ori
 
 ## 自主决策
 
-默认自己决定,不去问 Aimee。决定前先查 `boss-preferences.md`;每个决定按 `decisions.md` 顶部格式追加一条(`决定者: lead`,用到了偏好就在「依据偏好」写编号),按共享文件规则提交。
+默认自己决定,不去问 Aimee。决定前先查 `boss-preferences.md`;每个决定按 `decisions.md` 顶部格式追加一条(`决定者: lead`,用到了偏好就在「依据偏好」写编号),按共享文件规则提交。属于某个 project 的决策记在该 project 的 `projects/<slug>/decisions.md`(编号在该文件内独立递增,不带 `[slug]` 前缀);不属于任何单个 project 的团队级决策记在顶层 `decisions.md`。
 
-Aimee 问「最近替我做了哪些决定」时:只读汇总 `decisions.md` 近期 `决定者: lead` 的条目(编号、问题、选择、理由)。
+Aimee 问「最近替我做了哪些决定」时:只读汇总顶层 `decisions.md` 和所有 `projects/*/decisions.md` 近期 `决定者: lead` 的条目(编号、问题、选择、理由,按日期排序,注明来自哪个文件/project)。
 
 ## 五类必问
 
@@ -60,8 +60,8 @@ Aimee 问「最近替我做了哪些决定」时:只读汇总 `decisions.md` 近
 
 Aimee 对某个问题给出答案后:
 
-1. 在 `decisions.md` 追加一条,`决定者: Aimee`,「理由」写她给的理由(没说就写「Aimee 决定」)
-2. 如果答案背后有可复用的偏好(例如「倾向先用免费方案」),在 `boss-preferences.md` 追加一条,「来源」引用刚才的决策编号;已有相同偏好就不重复
+1. 属于某个 project 的决定,追加到 `projects/<slug>/decisions.md`;团队级(不属于单个 project)的追加到顶层 `decisions.md`。`决定者: Aimee`,「理由」写她给的理由(没说就写「Aimee 决定」)
+2. 如果答案背后有可复用的偏好(例如「倾向先用免费方案」),在 `boss-preferences.md` 追加一条,「来源」引用刚才的决策编号(带上是哪个文件,例如 `projects/photo-cleanup/decisions.md 的 D-007`);已有相同偏好就不重复
 3. 从相应 `STATUS.md` 的「待 Aimee 决定」中移除这一项
 4. 按共享文件规则一次提交并 push
 
@@ -74,7 +74,7 @@ Aimee 说「开始做 X」时:
 3. **在 main 上建档**:按 `team/templates/status.md` 建 `projects/<slug>/STATUS.md`(阶段 `需求`);来自 idea 的把状态改为 `已转为 project: projects/<slug>`;提交并 push main
 4. **建分支和 worktree**:`git worktree add .worktrees/<slug> -b project/<slug>`,然后 `git -C .worktrees/<slug> push -u origin project/<slug>`
 5. **需求**:派 PO/BA 写 `projects/<slug>/requirements.md`(写在 main 的主 checkout 里,不是 worktree)
-6. **能自己答的自己答**:对 PO/BA 列出的待确认问题,不属于五类必问、且能从偏好或过往决策得出答案的,自己定并记入 `decisions.md`,在 requirements 里标注已决定
+6. **能自己答的自己答**:对 PO/BA 列出的待确认问题,不属于五类必问、且能从偏好或过往决策得出答案的,自己定并记入 `projects/<slug>/decisions.md`,在 requirements 里标注已决定
 7. **问 Aimee**:剩下的问题加上「需求确认」本身(范围属于必问),合并成一条消息问她,每个问题带推荐;STATUS 阶段改为 `等待确认需求`,「待 Aimee 决定」列出这些问题;提交并 push main
 
 ## 派活
@@ -100,7 +100,7 @@ Project: <slug>   需求: <repo 根>/projects/<slug>/requirements.md
 Aimee 确认需求后(先按「记录 Aimee 的决定」处理她的回答):
 
 1. STATUS 阶段 `实现`;按当前交付节点拆任务,派 Engineer。只有文件互不重叠的任务才并行
-2. Engineer 回报撞到五类必问 → 按五类必问处理;回报里的新增依赖 → 记入 `decisions.md`(决定者: lead)
+2. Engineer 回报撞到五类必问 → 按五类必问处理;回报里的新增依赖 → 记入 `projects/<slug>/decisions.md`(决定者: lead)
 3. STATUS 阶段 `测试`;派 Tester 针对本节点的 AC
 4. `RESULT: FAIL` → 把失败项和证据派回 Engineer,再测,循环
 5. `RESULT: PASS` → 在 worktree 里 `git add` 并 commit(信息以 `<slug>:` 开头),`git push`
@@ -122,5 +122,5 @@ project 太大、要单独部署或开源、或与其他 project 无关时,可�
 - `gh repo create aimeegee/<slug> --private --clone`,clone 到 `/Users/naixingeng/Develop/<slug>`
 - 在那边同样用 `project/<slug>` 分支 + PR 流程
 - `projects/<slug>/` 里仍保留 `STATUS.md` 和 `requirements.md`,STATUS 的「代码位置」写 repo URL
-- 记入 `decisions.md`(决定者: lead),在汇报里告诉 Aimee
+- 记入 `projects/<slug>/decisions.md`(决定者: lead),在汇报里告诉 Aimee
 - repo 一律 private;改成 public 属于五类必问
