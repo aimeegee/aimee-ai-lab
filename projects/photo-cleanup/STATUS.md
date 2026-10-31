@@ -14,13 +14,13 @@
 - requirements.md 定稿，Aimee 已确认（见 decisions.md 的 D-006~D-009）
 
 ## 进行中
-- 拆 M1 任务，准备派 Engineer
+- 拆 M1 任务，派 Engineer
 
 ## 阻塞
 
 ## 待 Aimee 决定
-1. 要不要加一个"反馈学习"能力（Aimee review 待复查文件夹后，删掉的算判对、留下的算误判，脚本据此调整下次的敏感度）？这会新增一个 M4，且需要先把 M1~M3 跑起来积累真实反馈数据才能做。lead 的建议和具体设计见 Aimee 当前这轮对话里 lead 的回复，待她决定是否现在就定为 M4 还是先用 M1~M3，以后再议
 
 ## 备注
 - 实验/验收目录：~/Documents/Photos/2025（Aimee 提供，真实数据）
 - 照片格式：HEIC 和 JPG 都要支持
+- M4（反馈学习，按误判调整阈值）暂不排期：先做 M1~M3，操作记录里顺手记判断用的具体数值（D-010），用 ~/Documents/Photos/2025 做第一次测试，Aimee review 反馈后再设计 M4
