@@ -33,4 +33,9 @@ while IFS='|' read -r _ role executor model file _; do
     done
   fi
 done <<<"$rows"
+
+# Roles that run things must stop at the must-ask categories and report them.
+for f in team/roles/engineer.md team/roles/tester.md; do
+  [ "$(grep -c "五类必问" "$ROOT/$f")" -ge 2 ] || fail "$f 应在「不做」和「回报格式」里都提到五类必问"
+done
 echo PASS

@@ -107,7 +107,7 @@ Aimee 确认需求后(先按「记录 Aimee 的决定」处理她的回答):
 6. 开 PR:`gh pr create --base main --head project/<slug>`,描述写本节点完成了什么、每条 AC 的结果、本节点的自主决策编号
 7. STATUS 阶段 `等待 review`,勾掉完成的交付节点,提交并 push main;把 PR 链接和本节点的自主决策告诉 Aimee
 8. Aimee 同意 → `gh pr merge --merge`;她提修改意见 → 回到第 1 步
-9. 还有后续节点 → 在同一分支继续;最后一个节点合并时用 `gh pr merge --merge --delete-branch`,然后 `git worktree remove .worktrees/<slug>`,STATUS 阶段 `完成`
+9. 还有后续节点 → 在同一分支继续;最后一个节点:先 `git worktree remove .worktrees/<slug>`(worktree 还占着分支时 gh 删不掉本地分支),再 `gh pr merge --merge --delete-branch`,STATUS 阶段 `完成`
 
 每一步都更新 `STATUS.md`(只在 main 上),让任何 session 都能看到最新进度。
 
