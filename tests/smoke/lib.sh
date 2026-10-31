@@ -57,5 +57,8 @@ $TEST_SUFFIX" --allowedTools "${ALLOWED_TOOLS[@]}") >"$sb/../out.txt" 2>&1
   if grep -Eq "Failed to authenticate|Invalid API key|Please run /login" "$sb/../out.txt"; then
     fail "claude CLI 未登录,先在终端运行 claude 并 /login"
   fi
+  if grep -Eq "hit your .*limit|usage credits" "$sb/../out.txt"; then
+    fail "claude 用量上限,不是测试本身失败"
+  fi
   cat "$sb/../out.txt"
 }
