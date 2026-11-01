@@ -1,6 +1,6 @@
 # 照片清理工具
 
-- 阶段: 实现
+- 阶段: 测试
 - 分支: project/photo-cleanup
 - 代码位置: projects/photo-cleanup/
 - 最后更新: 2026-11-01
@@ -27,8 +27,12 @@
   - 这些测试/断言层面的问题已在 `tests/test_tester_review.py` 留了回归测试，可以直接复用
 - M1 代码（含 Tester 补测文件）已在 worktree 里提交并 push 到 `project/photo-cleanup`（commit c6cb811）。按新 PR 流程（顶层 decisions.md D-002），M1 测试通过后不单独开 PR，先继续做 M2，攒到一起再开
 
+- M2（执行版）Engineer 实现完成，自测 26 条测试全过（原 17 条 + 新增 9 条），并手动跑过一次端到端 CLI 全流程（227 个合成样本：preview → execute → 再 execute 验证幂等 → revert 还原），结果与 AC-17/18/19 一致。处理了 M1 Tester 发现的三项遗留（A: macOS 空格后缀识别及排序方向 bug 已修复；B: 样本生成器 Live Photo 视频内容加了随机性，AC-9 测试不再被完全重复规则意外掩盖；C: AC-10 断言阈值改成按样本量等比例计算）
+- 回收站实现：原计划用 `send2trash` 包，但本机环境拦截了 pip 安装第三方包；改用无新依赖方案，直接把文件移进 macOS 的 `~/.Trash`。局限：不写 Finder"原始位置"元数据、只支持 macOS、外接盘统一走 `~/.Trash`。不影响 Aimee 的使用场景（Mac 本机磁盘），已写进 README「已知局限」
+- 新增文件：executor.py、fsutil.py、trash.py；无新增三方依赖
+
 ## 进行中
-- 拆 M2 任务，派 Engineer
+- 派 Tester 独立验证 M2 的 AC-13~19（要求实际跑一遍功能确认 working，不止是单测）
 
 ## 阻塞
 
