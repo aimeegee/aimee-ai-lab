@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=65"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "photo-cleanup"
+version = "0.1.0"
+description = "本地照片清理工具（M1 预览版）：识别完全重复/相似图片/误拍短视频/截图，全程本地算法，不联网、不调用 LLM"
+requires-python = ">=3.9"
+dependencies = [
+    "Pillow>=10.0",
+    "pillow-heif>=0.13",
+    "ImageHash>=4.3",
+    "numpy>=2.0",
+    "opencv-python-headless>=4.8",
+]
+
+[project.scripts]
+photo-cleanup = "photo_cleanup.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
