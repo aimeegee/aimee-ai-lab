@@ -24,11 +24,14 @@ def _file_row(rec) -> dict:
         "命中原因": rec.final_reason,
         "动作": rec.final_action.value,
         "组号": rec.group_id,
-        "数值证据": _numeric_evidence_for(rec),
+        "数值证据": numeric_evidence_for(rec),
     }
 
 
-def _numeric_evidence_for(rec) -> dict:
+def numeric_evidence_for(rec) -> dict:
+    """命中时的具体数值（相似组：感知哈希距离；短视频：时长秒数）。
+    executor.py 的操作记录（M2）也用这个函数，保证报告和操作记录里的数值证据来自同一处逻辑。
+    """
     for h in rec.hits:
         if h.category == rec.final_category:
             return h.numeric_evidence

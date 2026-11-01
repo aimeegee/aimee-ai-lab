@@ -86,8 +86,8 @@ def _build_exact_duplicate_groups(media_files: list[FileRecord]) -> list[Duplica
                 kind="exact",
                 member_paths=sorted(m.path for m in members),
                 keep_path=keep_path,
-                reason_for_keep="文件名不带副本后缀（如空格+括号数字、短横线+数字）优先；"
-                "都带或都不带副本后缀时取文件名排序第一个",
+                reason_for_keep="文件名不带副本后缀（如空格+括号数字、短横线+数字、"
+                "macOS 常见的空格+数字如' 2'）优先；都带或都不带副本后缀时取文件名排序第一个",
             )
         )
     groups.sort(key=lambda g: g.group_id)

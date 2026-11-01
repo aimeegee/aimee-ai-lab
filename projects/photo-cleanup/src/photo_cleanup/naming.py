@@ -8,9 +8,18 @@ from __future__ import annotations
 import os
 import re
 
-# "xxx (1)"、"xxx-1" 这类系统自动加的副本后缀。
+# "xxx (1)"、"xxx-1"、以及 macOS Finder 复制文件时常加的 "xxx 2"/"xxx 3"
+# （空格+数字，不带括号）这三类系统自动加的副本后缀。
 # 不匹配下划线+数字（比如 IMG_0001 本身就是这种格式，不是副本后缀）。
-_COPY_SUFFIX_RE = re.compile(r"(\s\(\d+\)|-\d+)$")
+#
+# M2 修复记录（见 STATUS.md「已完成」commit c6cb811 之后、Tester 发现的已知缺口）：
+# 之前只认 "(1)"/"-1"，不认 " 2" 这种 macOS 常见后缀，导致 "IMG_1713.HEIC" 和
+# "IMG_1713 2.HEIC" 都被当成"不带后缀"，再按字符串排序时因为空格(0x20)小于点号
+# (0x2E)，min() 反而把带" 2"的文件名排在前面、被误判为"优先保留"——不只是漏判，
+# 方向也是错的。现在把这种后缀也纳入正则，"IMG_1713 2.HEIC" 会被正确识别为带副本
+# 后缀，从 pick_preferred_by_name 的候选池里排除掉，上面那个方向性错误也随之消失
+# （回归测试见 tests/test_tester_review.py）。
+_COPY_SUFFIX_RE = re.compile(r"(\s\(\d+\)|-\d+|\s\d+)$")
 
 # iOS 编辑版文件名：在前缀（通常是 "IMG_"）之后插入一个 "E"。
 # 例: IMG_1234.JPG 的编辑版是 IMG_E1234.JPG

@@ -94,16 +94,29 @@ def make_screenshot_of(photo: Image.Image, screen_w: int, screen_h: int) -> Imag
     return canvas
 
 
-def write_video(path: str, duration_seconds: float, fps: float = 30.0, size=(320, 240)) -> None:
+def write_video(
+    path: str, duration_seconds: float, fps: float = 30.0, size=(320, 240), seed: int | None = None
+) -> None:
+    """写一个合成测试视频。
+
+    M2 修复记录（Tester 发现的已知缺口，见 STATUS.md「已完成」commit c6cb811 之后的部分）：
+    之前帧内容只由循环下标 i 决定、不带任何 per-file 随机性，导致两个时长相同的视频字节
+    完全一致——Live Photo 样本里 12 个伴生 .MOV 时长都是 1.5 秒，于是全部互为"完全重复"，
+    AC-9 的测试因此被"完全重复"规则意外掩盖，并没有真正测到"短视频豁免"逻辑本身
+    （见 tests/test_tester_review.py 的独立复现）。这里加一个按 seed 派生的随机数生成器，
+    让同时长的视频也有不同字节内容，AC-9 在 test_acceptance.py 里就能测到真实的豁免逻辑，
+    不再依赖"完全重复"规则的意外掩盖。
+    """
     import cv2  # 延迟导入，原因见文件头注释
     import numpy as np
 
+    rng = np.random.RandomState(seed if seed is not None else random.randint(0, 2**31 - 1))
     n_frames = round(duration_seconds * fps)
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     vw = cv2.VideoWriter(path, fourcc, fps, size)
     w, h = size
-    for i in range(n_frames):
-        frame = np.full((h, w, 3), (i * 7) % 255, dtype=np.uint8)
+    for _ in range(n_frames):
+        frame = rng.randint(0, 255, (h, w, 3), dtype=np.uint8)
         vw.write(frame)
     vw.release()
 
@@ -251,14 +264,16 @@ def generate(root: str) -> dict:
     # ---------- AC-8: 短视频时长阈值 ----------
     video_dir = os.path.join(root, "short_video_test")
     os.makedirs(video_dir, exist_ok=True)
-    for name, dur, expect_marked in [
-        ("clip_1s.mp4", 1.0, True),
-        ("clip_2_9s.mp4", 2.9, True),
-        ("clip_3_0s.mp4", 3.0, False),
-        ("clip_10s.mp4", 10.0, False),
-    ]:
+    for i, (name, dur, expect_marked) in enumerate(
+        [
+            ("clip_1s.mp4", 1.0, True),
+            ("clip_2_9s.mp4", 2.9, True),
+            ("clip_3_0s.mp4", 3.0, False),
+            ("clip_10s.mp4", 10.0, False),
+        ]
+    ):
         path = os.path.join(video_dir, name)
-        write_video(path, dur)
+        write_video(path, dur, seed=40000 + i)
         manifest["short_videos"].append({"file": path, "duration_seconds": dur, "expect_marked": expect_marked})
 
     # ---------- AC-9: >=10 组 Live Photo ----------
@@ -270,7 +285,9 @@ def generate(root: str) -> dict:
         img_path = os.path.join(live_dir, f"IMG_{num:04d}.JPG")
         save_jpg(img, img_path, quality=90, exif=with_camera_exif(img))
         mov_path = os.path.join(live_dir, f"IMG_{num:04d}.MOV")
-        write_video(mov_path, 1.5)  # 低于短视频阈值，但是 Live Photo 伴生文件，不应被标记
+        # 低于短视频阈值，但是 Live Photo 伴生文件，不应被标记；每个伴生视频用不同 seed，
+        # 避免同时长的视频字节完全相同、被"完全重复"规则意外掩盖（见 write_video 的修复记录）
+        write_video(mov_path, 1.5, seed=50000 + i)
         manifest["live_photos"].append({"image": img_path, "mov": mov_path})
 
     # ---------- AC-10: 截图 / 相机照片 ----------

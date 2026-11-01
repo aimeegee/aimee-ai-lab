@@ -50,20 +50,22 @@ sys.exit(main(sys.argv[1:]))
     assert proc.returncode == 0, f"打了 socket 补丁后跑 preview 失败（可能真的发起了网络调用）:\n{proc.stdout}\n{proc.stderr}"
 
 
-# ---------- AC-4: 已知缺口——macOS 的「空格+数字2」副本后缀不被识别，且会导致保留错误的文件 ----------
-# 这不算 AC-4 字面要求之外的 FAIL（AC-4 原文举例只提 "(1)"/"-1"），但 STATUS.md 已经记录了这个缺口，
-# 这里把它变成一个可重复运行的断言，防止以后被静默"修复"或者被静默"更坏"而没人注意到。
+# ---------- AC-4: M2 已修复——macOS 的「空格+数字2」副本后缀不被识别，且会导致保留错误的文件 ----------
+# 这原本是 Tester 发现的已知缺口（AC-4 原文举例只提 "(1)"/"-1"，所以严格说不算字面要求之外的 FAIL，
+# 但 STATUS.md 记录了下来），M2 Engineer 已经在 naming.py 里修了（扩展正则 + 方向性错误随之消失，
+# 见 naming.py 的修复记录注释）。这里把原来"断言 bug 存在"的测试改成断言"bug 已修复"，
+# 继续留着当回归测试，防止以后被静默改回去。
 
 
-def test_ac4_known_gap_macos_space_2_suffix_not_recognized():
-    # 不被识别为副本后缀
-    assert naming.has_copy_suffix("IMG_1713 2.HEIC") is False
-    # 后果：两个文件名都被当成"不带后缀"，min() 按字符串排序——空格(0x20) < 点(0x2E)，
-    # 导致带" 2"的文件名反而被当成"优先保留"，这是 STATUS.md 里说的"选择有点随意"的具体表现。
+def test_ac4_macos_space_number_suffix_recognized_and_pick_direction_fixed():
+    assert naming.has_copy_suffix("IMG_1713 2.HEIC") is True
+    assert naming.has_copy_suffix("IMG_1713 3.HEIC") is True
+    assert naming.has_copy_suffix("IMG_1713.HEIC") is False
+
     picked = naming.pick_preferred_by_name(["IMG_1713.HEIC", "IMG_1713 2.HEIC"])
-    assert picked == "IMG_1713 2.HEIC", (
-        "如果这个断言失败，说明这个已知缺口被修复了（或者行为变了）——去更新 STATUS.md / README 的"
-        "「已知局限」，不要只删这个测试。"
+    assert picked == "IMG_1713.HEIC", (
+        "带' 2'这种 macOS 复制后缀的文件名现在应该被正确识别为副本，不应该被优先保留；"
+        "如果这个断言失败，说明修复被改回去了。"
     )
 
 

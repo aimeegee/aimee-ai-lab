@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -20,6 +22,8 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
+from trash_test_support import cleanup_trashed  # noqa: E402
 
 from photo_cleanup.classify import classify  # noqa: E402
 from photo_cleanup.config import Config  # noqa: E402
@@ -85,18 +89,45 @@ def test_ac1_no_network_calls_in_source():
     assert not offenders, f"源码里出现了可疑的网络调用: {offenders}"
 
 
-def test_ac1_preview_and_execute_modes_runnable(sample_world):
+def test_ac1_preview_and_execute_modes_runnable(sample_world, tmp_path):
     # preview 模式已跑通（sample_world fixture 本身就是一次完整 preview 运行）
     assert sample_world["report"]["模式"] == "preview"
-    # execute 模式(M2)按设计应明确报错，不是"假装支持"
+
+    # execute 模式(M2)现在已经实现了；在一份独立拷贝上跑一次，确认命令行入口能跑完、不报错。
+    # 真正的删除/移动/还原行为由 tests/test_execute_acceptance.py 的 AC-13~19 覆盖，这里只确认
+    # "preview 和 execute 两种模式都能跑完"这条 AC-1 本身的字面要求。
+    exec_dir = str(tmp_path / "exec_copy")
+    shutil.copytree(sample_world["dir"], exec_dir)
+    reports_dir = str(tmp_path / "reports")
     proc = subprocess.run(
-        [sys.executable, "-m", "photo_cleanup.cli", "--dir", sample_world["dir"], "--mode", "execute"],
+        [
+            sys.executable,
+            "-m",
+            "photo_cleanup.cli",
+            "--dir",
+            exec_dir,
+            "--mode",
+            "execute",
+            "--quiet",
+            "--review-dir",
+            str(tmp_path / "待复查"),
+            "--report-dir",
+            reports_dir,
+        ],
         cwd=PROJECT_SRC,
         capture_output=True,
         text=True,
     )
-    assert proc.returncode != 0
-    assert "M2" in proc.stderr or "execute" in proc.stderr
+    assert proc.returncode == 0, f"execute 模式运行失败:\n{proc.stdout}\n{proc.stderr}"
+
+    op_log_files = [n for n in os.listdir(reports_dir) if n.endswith("_operations.json")]
+    assert op_log_files, "execute 模式应该生成一份操作记录"
+    with open(os.path.join(reports_dir, op_log_files[0]), encoding="utf-8") as f:
+        op_log = json.load(f)
+    try:
+        assert op_log["操作数"] > 0
+    finally:
+        cleanup_trashed(op_log)
 
 
 # ---------- AC-2: 报告字段完整，汇总数与明细行数一致 ----------
@@ -267,7 +298,13 @@ def test_ac10_screenshot_detection(sample_world):
     assert len(resolutions) >= 3
 
     detected = sum(1 for p in screenshots if by_path[p].final_category == Category.SCREENSHOT)
-    assert detected >= 19, f"只有 {detected}/{len(screenshots)} 张截图被识别"
+    # 阈值按样本实际数量等比例设置（AC-10 原文"至少20张截图...至少19张被识别"隐含识别率 >= 95%），
+    # 不写死 19：如果以后样本集规模变了，断言也跟着变严/变松，不会变相放宽标准
+    # （Tester 发现的问题，见 STATUS.md「已完成」commit c6cb811 之后的部分）。
+    min_detected = math.ceil(len(screenshots) * 19 / 20)
+    assert detected >= min_detected, (
+        f"只有 {detected}/{len(screenshots)} 张截图被识别，要求 >= {min_detected}（即识别率 >= 95%）"
+    )
 
     false_positive = [p for p in camera_photos if by_path[p].final_category == Category.SCREENSHOT]
     assert not false_positive, f"以下相机照片被误判为截图: {false_positive}"
