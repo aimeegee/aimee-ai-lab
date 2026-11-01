@@ -1,13 +1,13 @@
 # 照片清理工具
 
-- 阶段: 测试
+- 阶段: 等待批准
 - 分支: project/photo-cleanup
 - 代码位置: projects/photo-cleanup/
 - 最后更新: 2026-11-01
 
 ## 交付节点
 - [x] M1: 预览版——生成报告，标出完全重复、相似组、短视频、截图，不动任何文件
-- [ ] M2: 执行版——删除完全重复副本、可疑项移到「待复查」、生成操作记录并支持还原
+- [x] M2: 执行版——删除完全重复副本、可疑项移到「待复查」、生成操作记录并支持还原
 - [ ] M3: 复用版——参数化 + agent 能直接读懂调用的接口（如 Claude Code skill），明年直接用
 
 ## 已完成
@@ -31,12 +31,19 @@
 - 回收站实现：原计划用 `send2trash` 包，但本机环境拦截了 pip 安装第三方包；改用无新依赖方案，直接把文件移进 macOS 的 `~/.Trash`。局限：不写 Finder"原始位置"元数据、只支持 macOS、外接盘统一走 `~/.Trash`。不影响 Aimee 的使用场景（Mac 本机磁盘），已写进 README「已知局限」
 - 新增文件：executor.py、fsutil.py、trash.py；无新增三方依赖
 
+- Tester 独立复核 M2 AC-13~19，结论 PASS。自己生成合成样本实际跑了一遍完整流程（preview→execute→execute→revert），不只信单测；额外验证了 A/B/C 三项修复是真的解决了问题，不是表面绕过。发现两个不影响本次判定、但要跟进的问题：
+  - **Aimee 的真实 macOS 废纸篓（`~/.Trash`）里已有 12 个开发阶段遗留的测试垃圾文件**（文件名形如 `Screenshot_conflict (1)*.PNG`），是之前 Engineer 开发/手动测试时没清理干净留下的，本身无害（在废纸篓里），但说明测试清理纪律不是 100% 可靠——**需要 Aimee 自己打开 Finder 废纸篓看一下，确认后自行清空**（lead 不会自动执行清空/永久删除操作）
+  - `--mode revert` 不传 `--operation-log` 时会取"最近一次"操作记录；如果按 AC-19 的思路连续 execute 两次（第二次是空操作，用于验证幂等），之后不带参数直接 revert 会捡到那份"空"的最近记录，提示"还原完成，共 0 个文件"，但实际上第一次 execute 真正移动到待复查的文件还在原地没还原——不算 AC 失败（给对参数就对），但对 M3「agent 不用问人就能完成预览/执行/还原三步」的目标是个陷阱，计划在 M3 前修（让 revert 跳过"操作数为 0"的日志，或找到更早的非空日志时提示）
+- M1+M2 代码已在 worktree 里 commit/push 到 `project/photo-cleanup`
+
 ## 进行中
-- 派 Tester 独立验证 M2 的 AC-13~19（要求实际跑一遍功能确认 working，不止是单测）
+- 等 Aimee 口头批准后 merge PR
 
 ## 阻塞
 
 ## 待 Aimee 决定
+- PR https://github.com/aimeegee/aimee-ai-lab/pull/2（M1+M2）：看完后口头说"批准"/"可以 merge"即可，不用在 GitHub 上 review（见 boss-preferences.md P-002）
+- 真实 Finder 废纸篓里有开发阶段遗留的测试垃圾文件（`Screenshot_conflict (1)*.PNG`），建议自行查看后清空；lead 不会自动执行清空/永久删除
 
 ## 备注
 - 实验/验收目录：~/Documents/Photos/2025（Aimee 提供，真实数据）
