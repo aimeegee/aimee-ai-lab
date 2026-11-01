@@ -36,10 +36,16 @@
   - `--mode revert` 不传 `--operation-log` 时会取"最近一次"操作记录；如果按 AC-19 的思路连续 execute 两次（第二次是空操作，用于验证幂等），之后不带参数直接 revert 会捡到那份"空"的最近记录，提示"还原完成，共 0 个文件"，但实际上第一次 execute 真正移动到待复查的文件还在原地没还原——不算 AC 失败（给对参数就对），但对 M3「agent 不用问人就能完成预览/执行/还原三步」的目标是个陷阱，计划在 M3 前修（让 revert 跳过"操作数为 0"的日志，或找到更早的非空日志时提示）
 - M1+M2 代码已在 worktree 里 commit/push 到 `project/photo-cleanup`
 - Aimee 口头批准（"OK批准合并，请合并以后跑一次"），PR #2 已 `gh pr merge --merge` 合并进 main，分支未删（M3 还要继续用）
-- 已在真实目录 ~/Documents/Photos/2025 上跑 `--mode execute`（Aimee 本人明确要求），在后台运行中，预计耗时量级参考 M1 preview 的约 51 分钟；完成后会汇总结果（删除数/移到待复查数/操作记录路径）并告诉 Aimee 如何在 Finder 里人工复查「待复查」文件夹
+- 已在真实目录 ~/Documents/Photos/2025 上跑 `--mode execute`（Aimee 本人明确要求）。耗时约 42.5 分钟。结果：
+  - 完全重复：2346 个副本移到系统回收站（`~/.Trash`），每组保留 1 个；macOS" 2"后缀的保留方向已验证是对的（如 `IMG_1713.HEIC` 留下，`IMG_1713 2.HEIC` 删除）
+  - 相似组多余项：45 个移到 `~/Documents/Photos/2025-待复查/相似/<组号>/`
+  - 短视频：27 个移到 `~/Documents/Photos/2025-待复查/短视频/`
+  - 截图：0（原目录里没有符合截图特征的文件，M1 阶段已确认）
+  - 报告/操作记录：`~/Documents/Photos/photo-cleanup-reports/2025_20261101-222717.{md,json}` 和对应的 `_operations.json`（含还原用的数值证据）
+  - 还未人工复查「待复查」文件夹，等 Aimee 自己在 Finder 里看
 
 ## 进行中
-- 等真实数据 execute 跑完，汇报结果
+- 等 Aimee 人工复查「待复查」文件夹后的反馈
 - 后续：拆 M3（参数化 + agent 调用接口）任务
 
 ## 阻塞
