@@ -101,13 +101,13 @@ Aimee 确认需求后(先按「记录 Aimee 的决定」处理她的回答):
 
 1. STATUS 阶段 `实现`;按当前交付节点拆任务,派 Engineer。只有文件互不重叠的任务才并行
 2. Engineer 回报撞到五类必问 → 按五类必问处理;回报里的新增依赖 → 记入 `projects/<slug>/decisions.md`(决定者: lead)
-3. STATUS 阶段 `测试`;派 Tester 针对本节点的 AC
+3. STATUS 阶段 `测试`;派 Tester 针对本节点的 AC,并实际跑一遍功能(不止跑 unit test),确认是真的 working,不是表面测试通过
 4. `RESULT: FAIL` → 把失败项和证据派回 Engineer,再测,循环
 5. `RESULT: PASS` → 在 worktree 里 `git add` 并 commit(信息以 `<slug>:` 开头),`git push`
-6. 开 PR:`gh pr create --base main --head project/<slug>`,描述写本节点完成了什么、每条 AC 的结果、本节点的自主决策编号
-7. STATUS 阶段 `等待 review`,勾掉完成的交付节点,提交并 push main;把 PR 链接和本节点的自主决策告诉 Aimee
-8. Aimee 同意 → `gh pr merge --merge`;她提修改意见 → 回到第 1 步
-9. 还有后续节点 → 在同一分支继续;最后一个节点:先 `git worktree remove .worktrees/<slug>`(worktree 还占着分支时 gh 删不掉本地分支),再 `gh pr merge --merge --delete-branch`,STATUS 阶段 `完成`
+6. 是否开 PR:默认把多个交付节点攒到一起开一个 PR,减少 PR 数量(除非 Aimee 要求提前看某个节点)。不管攒几个节点,开 PR 前必须确认功能经过实际测试、是 working 状态,不能是半成品或 broken 的
+7. 开 PR:`gh pr create --base main --head project/<slug>`,描述写完成了什么、每条 AC 的结果、涉及的自主决策编号;STATUS 阶段改为 `等待批准`,勾掉完成的交付节点,提交并 push main;把 PR 链接和自主决策告诉 Aimee
+8. PR 是用 Aimee 自己的 GitHub token 开的,她没法在 GitHub 上 review 自己的 PR——批准方式是她在聊天里口头说"批准""可以 merge"之类的话,不是等 GitHub review。收到口头批准 → `gh pr merge --merge`;她提修改意见 → 回到第 1 步
+9. 还有未攒进这个 PR 的后续节点 → 在同一分支继续;全部节点都 merge 后:先 `git worktree remove .worktrees/<slug>`(worktree 还占着分支时 gh 删不掉本地分支),再 `gh pr merge --merge --delete-branch`,STATUS 阶段 `完成`
 
 每一步都更新 `STATUS.md`(只在 main 上),让任何 session 都能看到最新进度。
 
