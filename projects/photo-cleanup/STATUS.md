@@ -1,6 +1,6 @@
 # 照片清理工具
 
-- 阶段: 等待批准
+- 阶段: 实现（M3 待开始）
 - 分支: project/photo-cleanup
 - 代码位置: projects/photo-cleanup/
 - 最后更新: 2026-11-01
@@ -35,14 +35,16 @@
   - **Aimee 的真实 macOS 废纸篓（`~/.Trash`）里已有 12 个开发阶段遗留的测试垃圾文件**（文件名形如 `Screenshot_conflict (1)*.PNG`），是之前 Engineer 开发/手动测试时没清理干净留下的，本身无害（在废纸篓里），但说明测试清理纪律不是 100% 可靠——**需要 Aimee 自己打开 Finder 废纸篓看一下，确认后自行清空**（lead 不会自动执行清空/永久删除操作）
   - `--mode revert` 不传 `--operation-log` 时会取"最近一次"操作记录；如果按 AC-19 的思路连续 execute 两次（第二次是空操作，用于验证幂等），之后不带参数直接 revert 会捡到那份"空"的最近记录，提示"还原完成，共 0 个文件"，但实际上第一次 execute 真正移动到待复查的文件还在原地没还原——不算 AC 失败（给对参数就对），但对 M3「agent 不用问人就能完成预览/执行/还原三步」的目标是个陷阱，计划在 M3 前修（让 revert 跳过"操作数为 0"的日志，或找到更早的非空日志时提示）
 - M1+M2 代码已在 worktree 里 commit/push 到 `project/photo-cleanup`
+- Aimee 口头批准（"OK批准合并，请合并以后跑一次"），PR #2 已 `gh pr merge --merge` 合并进 main，分支未删（M3 还要继续用）
+- 已在真实目录 ~/Documents/Photos/2025 上跑 `--mode execute`（Aimee 本人明确要求），在后台运行中，预计耗时量级参考 M1 preview 的约 51 分钟；完成后会汇总结果（删除数/移到待复查数/操作记录路径）并告诉 Aimee 如何在 Finder 里人工复查「待复查」文件夹
 
 ## 进行中
-- 等 Aimee 口头批准后 merge PR
+- 等真实数据 execute 跑完，汇报结果
+- 后续：拆 M3（参数化 + agent 调用接口）任务
 
 ## 阻塞
 
 ## 待 Aimee 决定
-- PR https://github.com/aimeegee/aimee-ai-lab/pull/2（M1+M2）：看完后口头说"批准"/"可以 merge"即可，不用在 GitHub 上 review（见 boss-preferences.md P-002）
 - 真实 Finder 废纸篓里有开发阶段遗留的测试垃圾文件（`Screenshot_conflict (1)*.PNG`），建议自行查看后清空；lead 不会自动执行清空/永久删除
 
 ## 备注
