@@ -32,3 +32,4 @@
 - 实验/验收目录：~/Documents/Photos/2025（Aimee 提供，真实数据）
 - 照片格式：HEIC 和 JPG 都要支持
 - M4（反馈学习，按误判调整阈值）暂不排期：先做 M1~M3，操作记录里顺手记判断用的具体数值（D-010），用 ~/Documents/Photos/2025 做第一次测试，Aimee review 反馈后再设计 M4
+- PR 流程（顶层 decisions.md 的 D-002）：M1 通过测试后不单独开 PR，先继续做 M2，攒到一起（除非 Aimee 要求提前看）；开 PR 前必须在真实数据上实际跑一遍功能确认 working；Aimee 批准方式是聊天里口头说，不走 GitHub review
